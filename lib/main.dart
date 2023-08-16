@@ -1,4 +1,5 @@
 import 'package:database_1/app_database.dart';
+import 'package:database_1/info_model.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -30,7 +31,7 @@ class FirstScreen extends StatefulWidget {
 
 class _FirstScreenState extends State<FirstScreen> {
   late AppDataBase myDB;
-  List<Map<String,dynamic>> infomList=[];
+  List<InfoModel> infomList=[];
 
   var nameController =TextEditingController();
   var deptController =TextEditingController();
@@ -44,7 +45,7 @@ class _FirstScreenState extends State<FirstScreen> {
   }
 
   void enterInfo(String name1,String dept1)async{
-    bool check = await myDB.addInfo(name1,dept1);
+    bool check = await myDB.addInfo(InfoModel(name: name1, dept: dept1));
 
     if(check) {
       infomList = await myDB.fetchAllInfo();
@@ -63,9 +64,78 @@ class _FirstScreenState extends State<FirstScreen> {
       body: ListView.builder(
         itemCount: infomList.length,
           itemBuilder: (context,index){
-          return ListTile(
-            title: Text('${infomList[index]["name"]}'),
-            subtitle:Text('${infomList[index]["dept"]}'),
+          return InkWell(
+            onTap: (){
+              nameController.text=infomList[index].name;
+              deptController.text=infomList[index].dept;
+              //for update Button
+                showModalBottomSheet(
+                    context: context,
+                    builder: (context){
+                      return Container(
+                        height: 500,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text('Update Data'),
+                            TextField(
+                              onTap: (){},
+                              controller: nameController,
+                              decoration: InputDecoration(
+                                  hintText: "Enter Name",
+                                  label: Text('Name'),
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10)
+                                  )
+                              ),
+                            ),
+                            TextField(
+                              onTap: (){},
+                              controller: deptController,
+                              decoration: InputDecoration(
+                                  hintText: "Enter Department",
+                                  label: Text('Department'),
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10)
+                                  )
+                              ),
+                            ),
+
+                            ElevatedButton(
+                                onPressed: ()async{
+                                  //get value from conntroller
+                                  var name2=nameController.text.toString();
+                                  var dept2=deptController.text.toString();
+                                  await myDB.update(InfoModel(id: infomList[index].id!,name: name2, dept: dept2));
+
+                                  getAllInfo();
+                                  //set empty controller
+                                  nameController.clear();
+                                  deptController.clear();
+                                  Navigator.pop(context);
+                                },
+                                child: Text("Update")
+                            )
+                          ],
+                        ),
+                      );
+                    }
+                );
+              },
+
+
+            child: ListTile(
+              leading: Text('${infomList[index].id!}'),
+              title: Text('${infomList[index].name}'),
+              subtitle:Text('${infomList[index].dept}'),
+              trailing: InkWell(
+                onTap: ()async{
+                  await myDB.delete(infomList[index].id!);
+                  getAllInfo();
+                },
+                  child: Icon(Icons.delete,color: Colors.red,)),
+            ),
           );
           }
       ),
