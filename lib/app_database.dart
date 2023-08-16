@@ -10,6 +10,10 @@ class AppDataBase{
   AppDataBase._();
   //class reference
   static final AppDataBase db=AppDataBase._();
+  static final tableName= "info";
+  static final column_Id= "id";
+  static final column_Name= "name";
+  static final column_Dept= "dept";
 
   //database reference
  Database? _database;
@@ -34,8 +38,8 @@ Future<Database> initDB()async{
  return openDatabase(
       path,
       version: 1,
-      onCreate: (db,version){
-        db.execute("Create table info(id integer primary Key autoincrement,name text,dept text)");
+      onCreate: (db,version)async{
+        db.execute("Create table $tableName($column_Id integer primary Key autoincrement,$column_Name text,$column_Dept text)");
       }
   );
 }
@@ -46,7 +50,7 @@ Future<bool> addInfo(String nm ,String dp)async{
   //check Database
   var d1= await getDB();
   //add info row
-  int rowsEffect= await d1.insert('info',{'name':nm,'dept':dp});
+  int rowsEffect= await d1.insert(tableName,{column_Name:nm,column_Dept:dp});
 
   //check row insert or not
   return rowsEffect>0;
@@ -55,7 +59,7 @@ Future<bool> addInfo(String nm ,String dp)async{
 Future<List<Map<String,dynamic>>> fetchAllInfo()async{
   //check database
   var d2=await getDB();
- List<Map<String,dynamic>> infoList = await d2.query("info");
+ List<Map<String,dynamic>> infoList = await d2.query(tableName);
   return infoList;
 }
 

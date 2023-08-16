@@ -32,16 +32,19 @@ class _FirstScreenState extends State<FirstScreen> {
   late AppDataBase myDB;
   List<Map<String,dynamic>> infomList=[];
 
+  var nameController =TextEditingController();
+  var deptController =TextEditingController();
+
   @override
   void initState() {
     super.initState();
     myDB=AppDataBase.db;
     //fetch all data
-    enterInfo();
+    getAllInfo();
   }
 
-  void enterInfo()async{
-    bool check = await myDB.addInfo("pallavi", "Flutter Developer");
+  void enterInfo(String name1,String dept1)async{
+    bool check = await myDB.addInfo(name1,dept1);
 
     if(check) {
       infomList = await myDB.fetchAllInfo();
@@ -49,6 +52,10 @@ class _FirstScreenState extends State<FirstScreen> {
     }
   }
 
+  getAllInfo()async{
+   infomList= await myDB.fetchAllInfo();
+    setState(() {});
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,7 +71,58 @@ class _FirstScreenState extends State<FirstScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: (){
-          enterInfo();
+         showModalBottomSheet(
+             context: context,
+             builder: (context){
+               return Container(
+                 height: 500,
+                 child: Column(
+                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                   crossAxisAlignment: CrossAxisAlignment.center,
+                   children: [
+                     Text('Add Data'),
+                     TextField(
+                       onTap: (){},
+                       controller: nameController,
+                       decoration: InputDecoration(
+                         hintText: "Enter Name",
+                         label: Text('Name'),
+                         border: OutlineInputBorder(
+                           borderRadius: BorderRadius.circular(10)
+                         )
+                       ),
+                     ),
+                     TextField(
+                       onTap: (){},
+                       controller: deptController,
+                       decoration: InputDecoration(
+                           hintText: "Enter Department",
+                           label: Text('Department'),
+                           border: OutlineInputBorder(
+                               borderRadius: BorderRadius.circular(10)
+                           )
+                       ),
+                     ),
+
+                      ElevatedButton(
+                          onPressed: (){
+                            //get value from conntroller
+                            var name2=nameController.text.toString();
+                            var dept2=deptController.text.toString();
+                            enterInfo(name2,dept2,);
+
+                            //set empty controller
+                            nameController.clear();
+                            deptController.clear();
+                            Navigator.pop(context);
+                          },
+                          child: Text("Add")
+                      )
+                   ],
+                 ),
+               );
+             }
+         );
         },
         child: Icon(Icons.add),
       ),
